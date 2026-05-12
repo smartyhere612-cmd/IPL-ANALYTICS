@@ -1,0 +1,114 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Teams — IPL Analytics{% endblock %}
+
+{% block dash_main %}
+<div class="dash-subnav glass-panel d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div class="small text-muted"><i class="fa-solid fa-people-group text-warning me-2"></i>Batting totals vs runs conceded while bowling</div>
+    <span class="badge text-bg-secondary border border-secondary">Teams</span>
+</div>
+
+<h1 class="h4 text-white mb-4 reveal-up">Team <span class="text-gradient">Analytics</span></h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Unique teams</span>
+            <span class="kpi-value counter" data-target="{{ landing.summary.unique_teams }}">0</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Matches in file</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_matches }}">0</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Total runs (league)</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_runs }}">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-bar text-warning me-2"></i>Runs scored while batting (top 10)</h6>
+            <canvas id="chartBattingTeams" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-shield-halved text-info me-2"></i>Runs conceded while fielding (top 10)</h6>
+            <canvas id="chartBowlingTeams" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-6 reveal-up">
+        <div class="table-card">
+            <h6 class="mb-3">Batting totals</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm align-middle mb-0">
+                    <thead><tr><th>Team</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for t in landing.chart_team_runs.labels %}
+                        <tr><td>{{ t }}</td><td>{{ landing.chart_team_runs.data[loop.index0] }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="table-card">
+            <h6 class="mb-3">Runs conceded (bowling_team)</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm align-middle mb-0">
+                    <thead><tr><th>Team</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for t in landing.chart_bowling_conceded.labels %}
+                        <tr><td>{{ t }}</td><td>{{ landing.chart_bowling_conceded.data[loop.index0] }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    const C = {{ charts|tojson }};
+    const tick = '#94a3b8', grid = 'rgba(148,163,184,0.1)';
+    const scales = {
+        x: { ticks: { color: tick }, grid: { color: grid } },
+        y: { ticks: { color: tick }, grid: { color: grid } }
+    };
+    const neon = ['#f97316', '#22d3ee', '#a855f7', '#ec4899', '#fbbf24'];
+    function pal(n) { const o = []; for (let i = 0; i < n; i++) o.push(neon[i % neon.length]); return o; }
+    if (C.team.labels.length) {
+        new Chart(document.getElementById('chartBattingTeams'), {
+            type: 'bar',
+            data: { labels: C.team.labels, datasets: [{ data: C.team.data, backgroundColor: pal(C.team.labels.length), borderRadius: 8 }] },
+            options: { plugins: { legend: { display: false } }, scales }
+        });
+    }
+    if (C.bowling.labels.length) {
+        new Chart(document.getElementById('chartBowlingTeams'), {
+            type: 'bar',
+            data: { labels: C.bowling.labels, datasets: [{ data: C.bowling.data, backgroundColor: pal(C.bowling.labels.length), borderRadius: 8 }] },
+            options: { plugins: { legend: { display: false } }, scales }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Matches — IPL Analytics{% endblock %}
+
+{% block dash_main %}
+<div class="dash-subnav glass-panel d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div class="small text-muted"><i class="fa-solid fa-baseball-bat-ball text-info me-2"></i>Over curves, extras, dismissals, and high innings</div>
+    <span class="badge text-bg-secondary border border-secondary">Matches</span>
+</div>
+
+<h1 class="h4 text-white mb-4 reveal-up">Match <span class="text-gradient">Patterns</span></h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Deliveries</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_deliveries }}">0</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Wickets recorded</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_wickets }}">0</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Highest innings</span>
+            <span class="kpi-value counter" data-target="{{ stats.highest_score }}">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-line text-info me-2"></i>Runs scored across overs 0–19</h6>
+            <canvas id="chartMatchOvers" height="280"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-pie text-warning me-2"></i>Extra runs by type</h6>
+            <canvas id="chartMatchExtras" height="280"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-circle-notch text-purple me-2"></i>Dismissal mix</h6>
+            <canvas id="chartMatchDismiss" height="280"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>Highest match aggregates (runs)</h6>
+            <canvas id="chartTopMatches" height="280"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12 reveal-up">
+        <div class="table-card">
+            <h6 class="mb-3">Top team innings (runs)</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm mb-0">
+                    <thead><tr><th>Match ID</th><th>Inn</th><th>Team</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for row in landing.table_top_innings %}
+                        <tr>
+                            <td>{{ row.match_id }}</td>
+                            <td>{{ row.inning }}</td>
+                            <td>{{ row.batting_team }}</td>
+                            <td>{{ row.runs }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    const C = {{ charts|tojson }};
+    const tick = '#94a3b8', grid = 'rgba(148,163,184,0.1)';
+    const scales = {
+        x: { ticks: { color: tick }, grid: { color: grid } },
+        y: { ticks: { color: tick }, grid: { color: grid } }
+    };
+    const neon = ['#22d3ee', '#f97316', '#a855f7', '#ec4899', '#fbbf24', '#34d399'];
+    function pal(n) { const o = []; for (let i = 0; i < n; i++) o.push(neon[i % neon.length]); return o; }
+    if (C.over.labels.length) {
+        new Chart(document.getElementById('chartMatchOvers'), {
+            type: 'line',
+            data: {
+                labels: C.over.labels,
+                datasets: [{ label: 'Runs', data: C.over.data, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.12)', fill: true, tension: 0.35 }]
+            },
+            options: { plugins: { legend: { labels: { color: '#cbd5e1' } } }, scales }
+        });
+    }
+    if (C.extras.labels.length) {
+        new Chart(document.getElementById('chartMatchExtras'), {
+            type: 'pie',
+            data: { labels: C.extras.labels, datasets: [{ data: C.extras.data, backgroundColor: pal(C.extras.labels.length), borderWidth: 0 }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 10 } } } }
+        });
+    }
+    if (C.dismissals.labels.length) {
+        new Chart(document.getElementById('chartMatchDismiss'), {
+            type: 'doughnut',
+            data: { labels: C.dismissals.labels, datasets: [{ data: C.dismissals.data, backgroundColor: pal(C.dismissals.labels.length), borderWidth: 0 }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 10 } } } }
+        });
+    }
+    if (C.top_matches.labels.length) {
+        new Chart(document.getElementById('chartTopMatches'), {
+            type: 'bar',
+            data: { labels: C.top_matches.labels, datasets: [{ label: 'Match total runs', data: C.top_matches.data, backgroundColor: pal(C.top_matches.labels.length), borderRadius: 6 }] },
+            options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: tick, maxRotation: 90, minRotation: 45 }, grid: { color: grid } }, y: { ticks: { color: tick }, grid: { color: grid } } } }
+        });
+    }
+});
+</script>
+{% endblock %}

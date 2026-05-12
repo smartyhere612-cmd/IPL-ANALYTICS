@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IPL Data Analytics{% endblock %}</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Page load overlay -->
+    <div id="page-loader" class="page-loader" aria-hidden="true">
+        <div class="loader-orbit">
+            <i class="fa-solid fa-baseball-bat-ball loader-icon"></i>
+        </div>
+    </div>
+
+    <!-- Flash messages (login errors, logout, etc.) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-stack container position-fixed top-0 start-50 translate-middle-x mt-5 pt-5">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} glass-alert shadow-lg reveal-up mb-2" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark ipl-navbar fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                <span class="brand-icon"><i class="fa-solid fa-chart-line"></i></span>
+                <span class="brand-text">IPL<span class="text-accent">Analytics</span></span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('teams') }}">Teams</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('players') }}">Players</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('matches') }}">Matches</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('season') }}">Season</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Overview</a></li>
+                    {% if session.get('logged_in') %}
+                    <li class="nav-item"><a class="nav-link text-warning" href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link btn-nav-login" href="{{ url_for('login') }}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="ipl-footer mt-5">
+        <div class="footer-glow"></div>
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h5 class="footer-brand mb-3"><i class="fa-solid fa-bolt text-warning me-2"></i>IPL Analytics</h5>
+                    <p class="text-muted small">Futuristic sports intelligence for teams, players, and season trends. Demo data for presentation.</p>
+                    <div class="social-icons mt-3">
+                        <a href="#" aria-label="Twitter" class="social-link"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn" class="social-link"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="GitHub" class="social-link"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" aria-label="YouTube" class="social-link"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-uppercase text-accent mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('index') }}#features">Features</a></li>
+                        <li><a href="{{ url_for('index') }}#csv-analytics">Analytics</a></li>
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        <li><a href="{{ url_for('signup') }}">Register</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-uppercase text-accent mb-3">Contact</h6>
+                    <p class="text-muted small mb-1"><i class="fa-solid fa-envelope me-2 text-info"></i>hello@iplanalytics.demo</p>
+                    <p class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-2 text-info"></i>Bengaluru, India</p>
+                    <p class="text-muted small">&copy; <span id="year-copy"></span> IPL Analytics. Educational project.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block page_js %}{% endblock %}
+</body>
+</html>

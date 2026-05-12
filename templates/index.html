@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block title %}IPL Data Analytics — Home{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block content %}
+{% set s = landing.summary %}
+<!-- Hero: data-backed IPL landing -->
+<section id="home" class="hero-section position-relative overflow-hidden">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-stadium-lights"></div>
+    <div class="floating-cricket float-1"><i class="fa-solid fa-baseball-bat-ball"></i></div>
+    <div class="floating-cricket float-2"><i class="fa-solid fa-baseball-bat-ball"></i></div>
+    <div class="floating-cricket float-3"><i class="fa-solid fa-trophy"></i></div>
+    <div class="floating-cricket float-4"><i class="fa-solid fa-database"></i></div>
+    <div class="hero-gradient-overlay"></div>
+    <div class="container position-relative z-2 py-5 min-vh-100 d-flex flex-column justify-content-center">
+        {% if not landing.ok %}
+        <div class="alert alert-warning glass-alert text-center mb-4 reveal-up" role="alert">
+            <strong>Dataset notice:</strong> {{ landing.error }}
+        </div>
+        {% else %}
+        <div class="text-center mb-4 reveal-up">
+            <span class="badge rounded-pill px-3 py-2 badge-dataset"><i class="fa-solid fa-table me-2"></i>Powered by <code>deliveries.csv</code></span>
+        </div>
+        {% endif %}
+        <div class="row align-items-center">
+            <div class="col-lg-10 mx-auto text-center">
+                <p class="hero-eyebrow reveal-up"><span class="typing-text" data-text="Ball-by-ball intelligence"></span></p>
+                <h1 class="display-4 fw-bold hero-title reveal-up">IPL Data Analytics Dashboard</h1>
+                <p class="lead text-light-soft hero-sub reveal-up">
+                    Explore live aggregates from the IPL deliveries dataset — team totals, batter leaderboards, wicket takers, extras, and over-by-over scoring patterns.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3 mt-4 reveal-up">
+                    <a href="#csv-analytics" class="btn btn-glow btn-lg px-4">View Analytics</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-glass btn-lg px-4">Login</a>
+                </div>
+                <!-- KPI counters from Pandas summary -->
+                <div class="row g-3 mt-5 justify-content-center">
+                    <div class="col-6 col-md-3">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.unique_teams }}">0</span>
+                            <span class="stat-label">Teams</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.unique_matches }}">0</span>
+                            <span class="stat-label">Matches</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.total_deliveries }}">0</span>
+                            <span class="stat-label">Deliveries</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.total_runs }}">0</span>
+                            <span class="stat-label">Total runs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-3 justify-content-center">
+                    <div class="col-6 col-md-4">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.total_wickets }}">0</span>
+                            <span class="stat-label">Wickets</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.total_sixes }}">0</span>
+                            <span class="stat-label">Sixes</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="glass-stat-card reveal-up">
+                            <span class="stat-value counter" data-target="{{ s.highest_innings_runs }}">0</span>
+                            <span class="stat-label">Highest innings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="teams" class="py-2"></section>
+<section id="players" class="py-2"></section>
+
+<section id="features" class="py-5 section-glow">
+    <div class="container">
+        <div class="text-center mb-5 reveal-up">
+            <h2 class="section-title">Why <span class="text-gradient">IPL Analytics</span></h2>
+            <p class="text-muted">Flask + Pandas pipeline — responsive Bootstrap layout with Chart.js visualizations.</p>
+        </div>
+        <div class="row g-4">
+            {% set features = [
+                ('fa-database', 'CSV ingestion', 'Server-side Pandas aggregation from deliveries.csv.'),
+                ('fa-chart-column', 'Rich charts', 'Bar, line, pie, and doughnut charts with real totals.'),
+                ('fa-table', 'Summary tables', 'Top batters, bowlers, and highest-scoring innings.'),
+                ('fa-lock', 'Secure access', 'Session login — dashboard visible only after authentication.'),
+                ('fa-mobile-screen', 'Responsive UI', 'Mobile, tablet, and desktop layouts with glassmorphism.'),
+                ('fa-bolt', 'Smooth UX', 'Scroll reveals, counters, and polished motion transitions.')
+            ] %}
+            {% for icon, title, desc in features %}
+            <div class="col-md-6 col-lg-4 reveal-up">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="fa-solid {{ icon }}"></i></div>
+                    <h5 class="mt-3">{{ title }}</h5>
+                    <p class="text-muted small mb-0">{{ desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="match-analytics" class="py-2"></section>
+<section id="season-stats" class="py-2"></section>
+
+<!-- CSV-driven analytics -->
+<section id="csv-analytics" class="py-5 section-dark">
+    <div class="container">
+        <div class="text-center mb-5 reveal-up">
+            <h2 class="section-title">Insights from <span class="text-gradient">deliveries.csv</span></h2>
+            <p class="text-muted mb-0">Charts and tables rendered from aggregated ball-by-ball data.</p>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-people-group text-warning me-2"></i>Runs by batting team (top 10)</h6>
+                    <canvas id="chartTeamRuns" height="260"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-user text-success me-2"></i>Top run scorers (batters)</h6>
+                    <canvas id="chartBatterRuns" height="260"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-bullseye text-purple me-2"></i>Top wicket takers</h6>
+                    <canvas id="chartBowlerWickets" height="260"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-clock text-info me-2"></i>Total runs scored in each over (0–19)</h6>
+                    <canvas id="chartRunsByOver" height="260"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-scale-balanced text-orange me-2"></i>Extra runs by type</h6>
+                    <canvas id="chartExtras" height="260"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 reveal-up">
+                <div class="chart-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-user-xmark text-danger me-2"></i>Dismissal kinds (top)</h6>
+                    <canvas id="chartDismissals" height="260"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4 reveal-up">
+                <div class="mini-analytics-card">
+                    <span class="mini-label">Unique batters</span>
+                    <span class="mini-value counter" data-target="{{ s.unique_batters }}">0</span>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-up">
+                <div class="mini-analytics-card">
+                    <span class="mini-label">Boundaries (4s)</span>
+                    <span class="mini-value counter" data-target="{{ s.total_fours }}">0</span>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-up">
+                <div class="mini-analytics-card">
+                    <span class="mini-label">Six leader</span>
+                    <span class="mini-value mini-text">{{ s.most_sixes_batter }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 reveal-up">
+                <div class="table-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-ranking-star me-2 text-warning"></i>Top batters (runs)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-sm align-middle mb-0">
+                            <thead><tr><th>#</th><th>Player</th><th>Runs</th></tr></thead>
+                            <tbody>
+                                {% for row in landing.table_top_batters %}
+                                <tr><td>{{ loop.index }}</td><td>{{ row.batter }}</td><td>{{ row.runs }}</td></tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-muted">No data</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 reveal-up">
+                <div class="table-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-bullseye me-2 text-purple"></i>Top bowlers (wickets)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-sm align-middle mb-0">
+                            <thead><tr><th>#</th><th>Bowler</th><th>Wkts</th></tr></thead>
+                            <tbody>
+                                {% for row in landing.table_top_bowlers %}
+                                <tr><td>{{ loop.index }}</td><td>{{ row.bowler }}</td><td>{{ row.wickets }}</td></tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-muted">No data</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 reveal-up">
+                <div class="table-card h-100">
+                    <h6 class="mb-3"><i class="fa-solid fa-fire me-2 text-danger"></i>Highest team innings</h6>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-sm align-middle mb-0">
+                            <thead><tr><th>Match</th><th>Inn</th><th>Team</th><th>Runs</th></tr></thead>
+                            <tbody>
+                                {% for row in landing.table_top_innings %}
+                                <tr>
+                                    <td class="text-nowrap">{{ row.match_id }}</td>
+                                    <td>{{ row.inning }}</td>
+                                    <td class="small">{{ row.batting_team[:18] }}{% if row.batting_team|length > 18 %}…{% endif %}</td>
+                                    <td>{{ row.runs }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-muted">No data</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_js %}
+<script>
+/* Landing charts — data injected from Flask (Pandas aggregates) */
+document.addEventListener('DOMContentLoaded', function () {
+    const CHARTS = {{ charts|tojson }};
+    const neon = ['#22d3ee', '#f97316', '#a855f7', '#ec4899', '#fbbf24', '#34d399', '#818cf8', '#fb7185'];
+    const tick = '#94a3b8';
+    const grid = 'rgba(148,163,184,0.1)';
+    const axis = {
+        x: { ticks: { color: tick }, grid: { color: grid } },
+        y: { ticks: { color: tick }, grid: { color: grid } }
+    };
+
+    function colors(n) {
+        const out = [];
+        for (let i = 0; i < n; i++) out.push(neon[i % neon.length]);
+        return out;
+    }
+
+    if (typeof Chart === 'undefined') return;
+
+    function barChart(id, pack, label) {
+        const el = document.getElementById(id);
+        if (!el || !pack.labels.length) return;
+        new Chart(el, {
+            type: 'bar',
+            data: {
+                labels: pack.labels,
+                datasets: [{ label: label, data: pack.data, backgroundColor: colors(pack.labels.length), borderRadius: 8 }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: axis }
+        });
+    }
+
+    barChart('chartTeamRuns', CHARTS.team, 'Runs');
+    barChart('chartBatterRuns', CHARTS.batter, 'Runs');
+    barChart('chartBowlerWickets', CHARTS.bowler, 'Wickets');
+
+    const overEl = document.getElementById('chartRunsByOver');
+    if (overEl && CHARTS.over.labels.length) {
+        new Chart(overEl, {
+            type: 'line',
+            data: {
+                labels: CHARTS.over.labels,
+                datasets: [{
+                    label: 'Runs in over',
+                    data: CHARTS.over.data,
+                    borderColor: '#22d3ee',
+                    backgroundColor: 'rgba(34,211,238,0.12)',
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: '#cbd5e1' } } }, scales: axis }
+        });
+    }
+
+    const ex = document.getElementById('chartExtras');
+    if (ex && CHARTS.extras.labels.length) {
+        new Chart(ex, {
+            type: 'pie',
+            data: {
+                labels: CHARTS.extras.labels,
+                datasets: [{ data: CHARTS.extras.data, backgroundColor: colors(CHARTS.extras.labels.length), borderWidth: 0 }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 12 } } } }
+        });
+    }
+
+    const dis = document.getElementById('chartDismissals');
+    if (dis && CHARTS.dismissals.labels.length) {
+        new Chart(dis, {
+            type: 'doughnut',
+            data: {
+                labels: CHARTS.dismissals.labels,
+                datasets: [{ data: CHARTS.dismissals.data, backgroundColor: colors(CHARTS.dismissals.labels.length), borderWidth: 0 }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 12 } } } }
+        });
+    }
+});
+</script>
+{% endblock %}

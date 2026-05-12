@@ -1,0 +1,276 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Overview — IPL Analytics{% endblock %}
+
+{% block dash_main %}
+<div class="dash-subnav glass-panel d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-3 small text-muted">
+        <span><i class="fa-solid fa-database text-success me-1"></i>Source: deliveries.csv</span>
+        <span><i class="fa-solid fa-clock text-info me-1"></i>Pandas aggregates (cached)</span>
+    </div>
+    <div class="d-flex gap-2">
+        <span class="badge text-bg-secondary border border-secondary">Overview</span>
+    </div>
+</div>
+
+<h1 class="h4 text-white mb-4 reveal-up">Analytics <span class="text-gradient">Overview</span></h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon"><i class="fa-solid fa-calendar-check"></i></span>
+            <span class="kpi-label">Total Matches</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_matches }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon"><i class="fa-solid fa-fire"></i></span>
+            <span class="kpi-label">Total Runs</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_runs }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
+            <span class="kpi-label">Highest Innings</span>
+            <span class="kpi-value counter" data-target="{{ stats.highest_score }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon"><i class="fa-solid fa-percent"></i></span>
+            <span class="kpi-label">Runs / ball ×100</span>
+            <span class="kpi-value kpi-text">{{ stats.strike_rate }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon"><i class="fa-solid fa-list-ol"></i></span>
+            <span class="kpi-label">Deliveries</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_deliveries }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon text-warning"><i class="fa-solid fa-hat-cowboy"></i></span>
+            <span class="kpi-label">Orange Cap</span>
+            <span class="kpi-value kpi-text">{{ stats.orange_cap }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon text-purple"><i class="fa-solid fa-meteor"></i></span>
+            <span class="kpi-label">Purple Cap</span>
+            <span class="kpi-value kpi-text">{{ stats.purple_cap }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-icon text-danger"><i class="fa-solid fa-burst"></i></span>
+            <span class="kpi-label">Most Sixes</span>
+            <span class="kpi-value kpi-text">{{ stats.most_sixes }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-8 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-line text-info me-2"></i>Runs by over (all matches)</h6>
+            <canvas id="dashLineTeam" height="280"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-pie text-warning me-2"></i>Dismissal kinds</h6>
+            <canvas id="dashPieWins" height="280"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-bar text-success me-2"></i>Top batters (runs)</h6>
+            <canvas id="dashBarRuns" height="260"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-area text-purple me-2"></i>Team runs (top squads)</h6>
+            <canvas id="dashAreaSeason" height="260"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-circle-notch text-orange me-2"></i>Extra runs by type</h6>
+            <canvas id="dashDoughnutToss" height="260"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="widget-card">
+                    <h6 class="text-muted small text-uppercase">Wickets</h6>
+                    <p class="display-6 text-gradient mb-0">{{ stats.total_wickets }}</p>
+                    <p class="small text-muted mb-0">is_wicket in dataset</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="widget-card">
+                    <h6 class="text-muted small text-uppercase">Sixes / Fours</h6>
+                    <p class="display-6 text-info mb-0">{{ stats.total_sixes }} / {{ stats.total_fours }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="widget-card">
+                    <h6 class="text-muted small text-uppercase">Runs / ball</h6>
+                    <p class="small text-white mb-1">{{ ((stats.total_runs / stats.total_deliveries) if stats.total_deliveries else 0)|round(2) }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="widget-card widget-live">
+                    <h6 class="text-muted small text-uppercase">Session</h6>
+                    <p class="small text-success mb-0"><i class="fa-solid fa-circle fa-2xs me-1"></i>Authenticated</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-xl-6 reveal-up">
+        <div class="table-card">
+            <h6 class="mb-3"><i class="fa-solid fa-fire me-2 text-warning"></i>Highest innings</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-sm align-middle mb-0">
+                    <thead><tr><th>Match</th><th>Inn</th><th>Team</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for row in landing.table_top_innings %}
+                        <tr>
+                            <td>{{ row.match_id }}</td>
+                            <td>{{ row.inning }}</td>
+                            <td class="small">{{ row.batting_team }}</td>
+                            <td>{{ row.runs }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6 reveal-up">
+        <div class="table-card">
+            <h6 class="mb-3"><i class="fa-solid fa-ranking-star me-2 text-info"></i>Team runs (leaderboard)</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-sm align-middle mb-0">
+                    <thead><tr><th>Team</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for t in landing.chart_team_runs.labels %}
+                        <tr><td>{{ t }}</td><td>{{ landing.chart_team_runs.data[loop.index0] }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-muted small py-4 border-top border-secondary border-opacity-25">
+    IPL Analytics — Overview
+</footer>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    const CHARTS = {{ charts|tojson }};
+    const tick = '#94a3b8';
+    const grid = 'rgba(148,163,184,0.1)';
+    const opts = {
+        plugins: { legend: { labels: { color: '#cbd5e1' } } },
+        scales: {
+            x: { ticks: { color: tick }, grid: { color: grid } },
+            y: { ticks: { color: tick }, grid: { color: grid } }
+        }
+    };
+    const neon = ['#22d3ee', '#f97316', '#a855f7', '#ec4899', '#fbbf24', '#34d399', '#818cf8', '#fb7185'];
+    function colors(n) {
+        const o = [];
+        for (let i = 0; i < n; i++) o.push(neon[i % neon.length]);
+        return o;
+    }
+    if (CHARTS.over && CHARTS.over.labels.length) {
+        new Chart(document.getElementById('dashLineTeam'), {
+            type: 'line',
+            data: {
+                labels: CHARTS.over.labels,
+                datasets: [{
+                    label: 'Runs in over',
+                    data: CHARTS.over.data,
+                    borderColor: '#22d3ee',
+                    backgroundColor: 'rgba(34,211,238,0.12)',
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: opts
+        });
+    }
+    if (CHARTS.dismissals && CHARTS.dismissals.labels.length) {
+        new Chart(document.getElementById('dashPieWins'), {
+            type: 'pie',
+            data: {
+                labels: CHARTS.dismissals.labels,
+                datasets: [{ data: CHARTS.dismissals.data, backgroundColor: colors(CHARTS.dismissals.labels.length), borderWidth: 0 }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 10 } } } }
+        });
+    }
+    if (CHARTS.batter && CHARTS.batter.labels.length) {
+        new Chart(document.getElementById('dashBarRuns'), {
+            type: 'bar',
+            data: {
+                labels: CHARTS.batter.labels,
+                datasets: [{
+                    label: 'Runs',
+                    data: CHARTS.batter.data,
+                    backgroundColor: colors(CHARTS.batter.labels.length),
+                    borderRadius: 8
+                }]
+            },
+            options: { ...opts, plugins: { legend: { display: false } } }
+        });
+    }
+    if (CHARTS.team && CHARTS.team.labels.length) {
+        new Chart(document.getElementById('dashAreaSeason'), {
+            type: 'line',
+            data: {
+                labels: CHARTS.team.labels,
+                datasets: [{
+                    label: 'Team runs',
+                    data: CHARTS.team.data,
+                    borderColor: '#a855f7',
+                    backgroundColor: 'rgba(168,85,247,0.22)',
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: opts
+        });
+    }
+    if (CHARTS.extras && CHARTS.extras.labels.length) {
+        new Chart(document.getElementById('dashDoughnutToss'), {
+            type: 'doughnut',
+            data: {
+                labels: CHARTS.extras.labels,
+                datasets: [{ data: CHARTS.extras.data, backgroundColor: colors(CHARTS.extras.labels.length), borderWidth: 0 }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 10 } } } }
+        });
+    }
+});
+</script>
+{% endblock %}

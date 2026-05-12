@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Register — IPL Data Analytics{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-section min-vh-100 d-flex align-items-center position-relative overflow-hidden">
+    <div class="auth-bg-orbs"></div>
+    <div class="floating-cricket float-3 opacity-40"><i class="fa-solid fa-user-plus"></i></div>
+    <div class="container position-relative z-2 py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="auth-card glass-panel reveal-up">
+                    <div class="text-center mb-4">
+                        <div class="auth-logo mx-auto mb-3"><i class="fa-solid fa-id-card"></i></div>
+                        <h2 class="fw-bold text-white">Create Account</h2>
+                        <p class="text-muted small">Frontend-only registration UI (demo project)</p>
+                    </div>
+                    <!-- Client-side validation only — no backend user storage -->
+                    <form id="signupForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label text-light-soft" for="reg_user">Username</label>
+                            <input type="text" class="form-control form-glass" id="reg_user" name="username" minlength="3" required placeholder="Choose a username">
+                            <div class="invalid-feedback">Username must be at least 3 characters.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light-soft" for="reg_email">Email</label>
+                            <input type="email" class="form-control form-glass" id="reg_email" name="email" required placeholder="you@example.com">
+                            <div class="invalid-feedback">Please enter a valid email.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light-soft" for="reg_pass">Password</label>
+                            <input type="password" class="form-control form-glass" id="reg_pass" name="password" minlength="6" required placeholder="Min 6 characters">
+                            <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-light-soft" for="reg_pass2">Confirm Password</label>
+                            <input type="password" class="form-control form-glass" id="reg_pass2" name="password2" required placeholder="Repeat password">
+                            <div class="invalid-feedback" id="matchFeedback">Passwords must match.</div>
+                        </div>
+                        <button type="submit" class="btn btn-glow w-100 py-2 mb-3">Register</button>
+                        <p class="text-center text-muted small mb-0">
+                            Already have an account? <a href="{{ url_for('login') }}" class="link-accent">Login</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.getElementById('signupForm')?.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const p1 = document.getElementById('reg_pass');
+    const p2 = document.getElementById('reg_pass2');
+    let ok = this.checkValidity();
+    if (p1.value !== p2.value) {
+        p2.setCustomValidity('mismatch');
+        ok = false;
+    } else {
+        p2.setCustomValidity('');
+    }
+    this.classList.add('was-validated');
+    if (ok) {
+        alert('Registration UI only — use Login with admin / admin123 for the dashboard.');
+    }
+});
+document.getElementById('reg_pass2')?.addEventListener('input', function () {
+    const p1 = document.getElementById('reg_pass').value;
+    this.setCustomValidity(this.value && this.value !== p1 ? 'mismatch' : '');
+});
+</script>
+{% endblock %}

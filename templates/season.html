@@ -1,0 +1,106 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Season — IPL Analytics{% endblock %}
+
+{% block dash_main %}
+<div class="dash-subnav glass-panel d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div class="small text-muted"><i class="fa-solid fa-calendar text-purple me-2"></i>League-wide totals and score distribution from all innings in the file</div>
+    <span class="badge text-bg-secondary border border-secondary">Season</span>
+</div>
+
+<h1 class="h4 text-white mb-4 reveal-up">Season <span class="text-gradient">Snapshot</span></h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Matches</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_matches }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Total runs</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_runs }}">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Avg / match</span>
+            <span class="kpi-value kpi-text">{{ ((stats.total_runs / stats.total_matches) if stats.total_matches else 0)|round(1) }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Wickets</span>
+            <span class="kpi-value counter" data-target="{{ stats.total_wickets }}">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-column text-info me-2"></i>Innings score distribution (binned)</h6>
+            <canvas id="chartSeasonHist" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-ranking-star text-warning me-2"></i>Highest combined match totals</h6>
+            <canvas id="chartSeasonTop" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-12 reveal-up">
+        <div class="chart-card">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-area text-purple me-2"></i>Team batting aggregate (top franchises)</h6>
+            <canvas id="chartSeasonTeams" height="260"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="alert glass-alert border border-secondary border-opacity-25 text-muted small mb-5 reveal-up" role="note">
+    “Season” here refers to the full <code>deliveries.csv</code> sample in aggregate (no separate season column in the file). Charts summarize all rows loaded into the app cache.
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    const C = {{ charts|tojson }};
+    const tick = '#94a3b8', grid = 'rgba(148,163,184,0.1)';
+    const scales = {
+        x: { ticks: { color: tick, maxRotation: 45 }, grid: { color: grid } },
+        y: { ticks: { color: tick }, grid: { color: grid } }
+    };
+    const neon = ['#a855f7', '#22d3ee', '#f97316', '#34d399', '#fbbf24'];
+    function pal(n) { const o = []; for (let i = 0; i < n; i++) o.push(neon[i % neon.length]); return o; }
+    if (C.innings_hist.labels.length) {
+        new Chart(document.getElementById('chartSeasonHist'), {
+            type: 'bar',
+            data: {
+                labels: C.innings_hist.labels,
+                datasets: [{ label: 'Innings count', data: C.innings_hist.data, backgroundColor: 'rgba(168,85,247,0.55)', borderRadius: 6 }]
+            },
+            options: { plugins: { legend: { display: false } }, scales }
+        });
+    }
+    if (C.top_matches.labels.length) {
+        new Chart(document.getElementById('chartSeasonTop'), {
+            type: 'bar',
+            data: { labels: C.top_matches.labels, datasets: [{ data: C.top_matches.data, backgroundColor: pal(C.top_matches.labels.length), borderRadius: 6 }] },
+            options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: tick, maxRotation: 90, minRotation: 45 }, grid: { color: grid } }, y: { ticks: { color: tick }, grid: { color: grid } } } }
+        });
+    }
+    if (C.team.labels.length) {
+        new Chart(document.getElementById('chartSeasonTeams'), {
+            type: 'line',
+            data: {
+                labels: C.team.labels,
+                datasets: [{ label: 'Runs', data: C.team.data, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.15)', fill: true, tension: 0.35 }]
+            },
+            options: { plugins: { legend: { labels: { color: '#cbd5e1' } } }, scales }
+        });
+    }
+});
+</script>
+{% endblock %}

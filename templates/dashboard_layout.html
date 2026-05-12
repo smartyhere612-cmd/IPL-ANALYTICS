@@ -1,0 +1,69 @@
+{# Shared shell for authenticated analytics pages: top bar + fixed sidebar + main #}
+{% extends "base.html" %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-dark dash-topbar fixed-top">
+    <div class="container-fluid px-3">
+        <button class="btn btn-glass d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashDrawer" aria-controls="dashDrawer" aria-label="Open menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+            <i class="fa-solid fa-chart-line text-warning"></i>
+            <span class="brand-text">IPL<span class="text-accent">Analytics</span></span>
+        </a>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <span class="text-muted small d-none d-md-inline"><i class="fa-solid fa-user-shield me-1"></i>{{ session.get('username', 'User') }}</span>
+            <span class="badge rounded-pill text-bg-dark border border-secondary pulse-badge">deliveries.csv</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell w-100">
+    <!-- Desktop sidebar: full page routes (no hash anchors) -->
+    <aside class="dash-sidebar d-none d-lg-flex flex-column">
+        <div class="sidebar-brand py-4 px-3">
+            <span class="text-gradient fw-bold">Control Room</span>
+        </div>
+        <nav class="nav flex-column px-2 gap-1 flex-grow-1" aria-label="Main navigation">
+            <a class="nav-link dash-nav-link {% if active_nav == 'overview' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-gauge-high me-2"></i>Overview</a>
+            <a class="nav-link dash-nav-link {% if active_nav == 'teams' %}active{% endif %}" href="{{ url_for('teams') }}"><i class="fa-solid fa-people-group me-2"></i>Teams</a>
+            <a class="nav-link dash-nav-link {% if active_nav == 'players' %}active{% endif %}" href="{{ url_for('players') }}"><i class="fa-solid fa-user me-2"></i>Players</a>
+            <a class="nav-link dash-nav-link {% if active_nav == 'matches' %}active{% endif %}" href="{{ url_for('matches') }}"><i class="fa-solid fa-baseball-bat-ball me-2"></i>Matches</a>
+            <a class="nav-link dash-nav-link {% if active_nav == 'season' %}active{% endif %}" href="{{ url_for('season') }}"><i class="fa-solid fa-calendar me-2"></i>Season</a>
+        </nav>
+        <div class="p-3 small text-muted border-top border-secondary border-opacity-25">
+            <a href="{{ url_for('index') }}" class="link-accent text-decoration-none"><i class="fa-solid fa-house me-1"></i>Landing</a>
+        </div>
+    </aside>
+
+    {# Mobile drawer: plain <a href> routes only — do NOT use data-bs-dismiss on links (Bootstrap can preventDefault and block navigation on iOS/Android). Close via JS + high z-index so flash/nav never steal taps. #}
+    <div class="offcanvas offcanvas-start text-bg-dark dash-offcanvas" tabindex="-1" id="dashDrawer" aria-labelledby="dashDrawerLabel" data-bs-scroll="false">
+        <div class="offcanvas-header border-bottom border-secondary border-opacity-25">
+            <h5 class="offcanvas-title" id="dashDrawerLabel">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column gap-2 px-2">
+            <nav class="nav flex-column gap-1" aria-label="Mobile main navigation">
+                <a class="nav-link dash-nav-link dash-offcanvas-link text-start {% if active_nav == 'overview' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-gauge-high me-2"></i>Overview</a>
+                <a class="nav-link dash-nav-link dash-offcanvas-link text-start {% if active_nav == 'teams' %}active{% endif %}" href="{{ url_for('teams') }}"><i class="fa-solid fa-people-group me-2"></i>Teams</a>
+                <a class="nav-link dash-nav-link dash-offcanvas-link text-start {% if active_nav == 'players' %}active{% endif %}" href="{{ url_for('players') }}"><i class="fa-solid fa-user me-2"></i>Players</a>
+                <a class="nav-link dash-nav-link dash-offcanvas-link text-start {% if active_nav == 'matches' %}active{% endif %}" href="{{ url_for('matches') }}"><i class="fa-solid fa-baseball-bat-ball me-2"></i>Matches</a>
+                <a class="nav-link dash-nav-link dash-offcanvas-link text-start {% if active_nav == 'season' %}active{% endif %}" href="{{ url_for('season') }}"><i class="fa-solid fa-calendar me-2"></i>Season</a>
+            </nav>
+            <hr class="border-secondary border-opacity-25 my-1">
+            <a class="nav-link dash-nav-link dash-offcanvas-link text-start" href="{{ url_for('index') }}"><i class="fa-solid fa-house me-2"></i>Landing page</a>
+            <a class="nav-link dash-nav-link dash-offcanvas-link text-start text-danger" href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a>
+        </div>
+    </div>
+
+    <div class="dash-main">
+        {% block dash_main %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

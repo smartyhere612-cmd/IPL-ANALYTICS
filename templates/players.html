@@ -1,0 +1,131 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Players — IPL Analytics{% endblock %}
+
+{% block dash_main %}
+<div class="dash-subnav glass-panel d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div class="small text-muted"><i class="fa-solid fa-user text-success me-2"></i>Batters, bowlers, and six-hitters from ball-by-ball data</div>
+    <span class="badge text-bg-secondary border border-secondary">Players</span>
+</div>
+
+<h1 class="h4 text-white mb-4 reveal-up">Player <span class="text-gradient">Insights</span></h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Unique batters</span>
+            <span class="kpi-value counter" data-target="{{ landing.summary.unique_batters }}">0</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Orange cap (runs)</span>
+            <span class="kpi-value kpi-text">{{ stats.orange_cap }}</span>
+        </div>
+    </div>
+    <div class="col-md-4 reveal-up">
+        <div class="kpi-card">
+            <span class="kpi-label">Purple cap (wkts)</span>
+            <span class="kpi-value kpi-text">{{ stats.purple_cap }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-bar text-success me-2"></i>Top run scorers</h6>
+            <canvas id="chartPlayersRuns" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6 reveal-up">
+        <div class="chart-card h-100">
+            <h6 class="mb-3"><i class="fa-solid fa-chart-bar text-purple me-2"></i>Top wicket takers</h6>
+            <canvas id="chartPlayersWkts" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-4 reveal-up">
+        <div class="table-card h-100">
+            <h6 class="mb-3">Top batters</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm mb-0">
+                    <thead><tr><th>Player</th><th>Runs</th></tr></thead>
+                    <tbody>
+                        {% for row in landing.table_top_batters %}
+                        <tr><td>{{ row.batter }}</td><td>{{ row.runs }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 reveal-up">
+        <div class="table-card h-100">
+            <h6 class="mb-3">Top bowlers</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm mb-0">
+                    <thead><tr><th>Bowler</th><th>Wkts</th></tr></thead>
+                    <tbody>
+                        {% for row in landing.table_top_bowlers %}
+                        <tr><td>{{ row.bowler }}</td><td>{{ row.wickets }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 reveal-up">
+        <div class="table-card h-100">
+            <h6 class="mb-3">Most sixes</h6>
+            <div class="table-responsive">
+                <table class="table table-dark table-sm mb-0">
+                    <thead><tr><th>Batter</th><th>6s</th></tr></thead>
+                    <tbody>
+                        {% for row in landing.table_top_six_hitters %}
+                        <tr><td>{{ row.batter }}</td><td>{{ row.sixes }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-muted">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    const C = {{ charts|tojson }};
+    const tick = '#94a3b8', grid = 'rgba(148,163,184,0.1)';
+    const scales = {
+        x: { ticks: { color: tick, maxRotation: 45, minRotation: 0 }, grid: { color: grid } },
+        y: { ticks: { color: tick }, grid: { color: grid } }
+    };
+    const neon = ['#34d399', '#a855f7', '#f97316', '#22d3ee'];
+    function pal(n) { const o = []; for (let i = 0; i < n; i++) o.push(neon[i % neon.length]); return o; }
+    if (C.batter.labels.length) {
+        new Chart(document.getElementById('chartPlayersRuns'), {
+            type: 'bar',
+            data: { labels: C.batter.labels, datasets: [{ label: 'Runs', data: C.batter.data, backgroundColor: pal(C.batter.labels.length), borderRadius: 8 }] },
+            options: { plugins: { legend: { display: false } }, scales }
+        });
+    }
+    if (C.bowler.labels.length) {
+        new Chart(document.getElementById('chartPlayersWkts'), {
+            type: 'bar',
+            data: { labels: C.bowler.labels, datasets: [{ label: 'Wickets', data: C.bowler.data, backgroundColor: pal(C.bowler.labels.length), borderRadius: 8 }] },
+            options: { plugins: { legend: { display: false } }, scales }
+        });
+    }
+});
+</script>
+{% endblock %}
